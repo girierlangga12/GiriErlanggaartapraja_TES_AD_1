@@ -1,0 +1,56 @@
+class Home extends StatefulWidget {
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  Future<List<Doa>> _futureDoa;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureDoa = fetchDoa();
+  }
+
+  Future<List<Doa>> fetchDoa() async {
+    final response = await http.get('https://doa-doa-api-ahmadramadhan.fly.dev/api');
+
+    if (response.statusCode == 200) {
+      List doaList = json.decode(response.body);
+      return doaList.map((doa) => Doa.fromJson(doa)).toList();
+    } else {
+      throw Exception('Failed to load doa');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: FutureBuilder<List<Doa>>(
+        future: _futureDoa,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+              itemCount: snapshot.data.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(snapshot.data[index].nama),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return Text("${snapshot.error}");
+          }
+          return CircularProgressIndicator();
+        },
+      ),
+    );
+  }
+}
+
+class Doa {
+  final String nama;
+
+  Doa({this.nama});
+
+  factory Doa.fromJ
